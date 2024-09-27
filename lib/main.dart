@@ -31,11 +31,16 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   Color _backgroundColor = Colors.white;
+  Color _previousColor = Colors.white; 
   final TextEditingController _controller = TextEditingController();
 
   void _changeBackgroundColor(String colorName) {
     setState(() {
+      _previousColor = _backgroundColor; 
       _backgroundColor = _getColorFromName(colorName);
+      if (_backgroundColor == Colors.grey) {
+        _showSnackBar("Color '$colorName' not recognized. Defaulting to grey.");
+      }
     });
   }
 
@@ -58,8 +63,17 @@ class _MyHomePageState extends State<MyHomePage> {
       case 'orange':
         return Colors.orange;
       default:
-        return Colors.grey; // Якщо колір не знайдено, фон буде сірим
+        return Colors.grey; 
     }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
@@ -70,14 +84,14 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: ColoredBox(
-        color: _backgroundColor,  // Використання ColoredBox замість Container
+        color: _backgroundColor,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text('Enter a color name to change the background:'),
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16),
                 child: TextField(
                   controller: _controller,
                   decoration: const InputDecoration(
@@ -86,6 +100,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   onSubmitted: _changeBackgroundColor,  
                 ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Previous Color:',
+                style: TextStyle(fontSize: 16),
+              ),
+              Container(
+                width: 100,
+                height: 100,
+                color: _previousColor,
               ),
             ],
           ),
