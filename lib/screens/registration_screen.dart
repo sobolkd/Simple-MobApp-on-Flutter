@@ -70,48 +70,52 @@ class RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> registerUser() async {
-    if (passwordController.text != confirmPasswordController.text) {
-      showSnackBar('Passwords do not match');
-      return;
-    }
-
-    final email = emailController.text;
-    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$').hasMatch(email)) {
-      showSnackBar('Invalid email format');
-      return;
-    }
-
-    if (firstNameController.text.contains(RegExp(r'\d')) || lastNameController.text.contains(RegExp(r'\d'))) {
-      showSnackBar('Name cannot contain numbers');
-      return;
-    }
-
-    if (passwordController.text.length < 6) {
-      showSnackBar('Password must be at least 6 characters long');
-      return;
-    }
-
-    final exists = await DatabaseHelper.checkIfUserExists(emailController.text);
-    if (exists) {
-      showSnackBar('Email is already registered');
-      return;
-    }
-
-    final newUser = {
-      'email': email,
-      'password': passwordController.text,
-      'first_name': firstNameController.text,
-      'last_name': lastNameController.text,
-    };
-
-    try {
-      await DatabaseHelper.insertUser(newUser);
-      showSnackBar('User registered successfully');
-      navigateBack();
-    } catch (e) {
-      showSnackBar('Error: $e');
-    }
+  if (passwordController.text != confirmPasswordController.text) {
+    showSnackBar('Passwords do not match');
+    return;
   }
+
+  final email = emailController.text;
+  if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$').hasMatch(email)) {
+    showSnackBar('Invalid email format');
+    return;
+  }
+
+  if (firstNameController.text.contains(RegExp(r'\d')) || lastNameController.text.contains(RegExp(r'\d'))) {
+    showSnackBar('Name cannot contain numbers');
+    return;
+  }
+
+  if (passwordController.text.length < 6) {
+    showSnackBar('Password must be at least 6 characters long');
+    return;
+  }
+
+  // Створюємо екземпляр DatabaseHelper
+  final databaseHelper = DatabaseHelper();
+
+  final exists = await databaseHelper.checkIfUserExists(emailController.text);
+  if (exists) {
+    showSnackBar('Email is already registered');
+    return;
+  }
+
+  final newUser = {
+    'email': email,
+    'password': passwordController.text,
+    'first_name': firstNameController.text,
+    'last_name': lastNameController.text,
+  };
+
+  try {
+    await databaseHelper.insertUser(newUser);
+    showSnackBar('User registered successfully');
+    navigateBack();
+  } catch (e) {
+    showSnackBar('Error: $e');
+  }
+}
+
 
   void showSnackBar(String message) {
     if (mounted) {

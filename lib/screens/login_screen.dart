@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_project/database_helper.dart';
 import 'package:my_project/screens/home_screen.dart';
 import 'package:my_project/screens/registration_screen.dart';
-import 'package:my_project/user.dart'; // Імпортуємо модель User
+import 'package:my_project/user.dart';
 import 'package:my_project/widgets/button.dart';
 import 'package:my_project/widgets/field_info.dart';
 
@@ -70,23 +70,22 @@ class LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    final exists = await DatabaseHelper.checkLogin(email, password);
+    final databaseHelper = DatabaseHelper();
+
+    final exists = await databaseHelper.checkLogin(email, password);
 
     if (exists) {
-      // Отримуємо дані користувача з бази
-      final user = await DatabaseHelper.getUserByEmail(email);
+      final user = await databaseHelper.getUserByEmail(email);
 
       if (user != null) {
-        // Переконуємося, що значення є рядком
         final firstName = user['first_name'] as String;
         final lastName = user['last_name'] as String;
-        final userEmail = user['email'] as String;
+        final email = user['email'] as String;
 
-        // Зберігаємо поточного користувача
         UserDataProvider.currentUser = User(
           firstName: firstName,
           lastName: lastName,
-          email: userEmail,
+          email: email,
         );
       }
 
