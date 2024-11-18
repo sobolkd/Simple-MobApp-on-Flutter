@@ -10,6 +10,7 @@ analyzer:
     dead_code: error
     unused_import: error
     unused_element: ignore
+    inference_failure_on_instance_creation: ignore
 
 linter:
   rules:

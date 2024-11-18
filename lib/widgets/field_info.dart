@@ -17,8 +17,9 @@ class FieldInfo extends StatelessWidget {
     return TextField(
       controller: controller,
       obscureText: obscureText,
+      style: const TextStyle(color: Colors.black),
       decoration: InputDecoration(
-        hintText: hintText, 
+        hintText: hintText,
         border: const OutlineInputBorder(),
         filled: true,
         fillColor: Colors.grey[200],
