@@ -3,6 +3,7 @@ import 'package:my_project/database_helper.dart';
 import 'package:my_project/network_utils.dart';
 import 'package:my_project/screens/create_character_screen.dart';
 import 'package:my_project/screens/profile_screen.dart';
+import 'package:my_project/screens/spell_list_screen.dart';
 import 'package:my_project/widgets/character_list_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -52,10 +53,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return showDialog<void>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('No Internet Connection', style: TextStyle(color:
-        Colors.black,),),
-        content: const Text('Please check your internet connection.', style: 
-        TextStyle(color: Colors.black,),),
+        title: const Text(
+          'No Internet Connection',
+          style: TextStyle(color: Colors.black),
+        ),
+        content: const Text(
+          'Please check your internet connection.',
+          style: TextStyle(color: Colors.black),
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -98,10 +103,28 @@ class _HomeScreenState extends State<HomeScreen> {
               characters: _characters,
               onDelete: _loadCharacters,
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _handleCreateCharacter,
-        tooltip: 'Create Character',
-        child: const Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            onPressed: _handleCreateCharacter,
+            tooltip: 'Create Character',
+            child: const Icon(Icons.add),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SpellListScreen(),
+                ),
+              );
+            },
+            tooltip: 'View Spells',
+            child: const Icon(Icons.book),
+          ),
+        ],
       ),
     );
   }
