@@ -3,11 +3,11 @@ import 'package:my_project/database_helper.dart';
 
 class CharacterListWidget extends StatelessWidget {
   final List<Map<String, dynamic>> characters;
-  final VoidCallback onDelete; // Функція для оновлення списку після видалення
+  final VoidCallback onDelete;
 
   const CharacterListWidget({
     required this.characters,
-    required this.onDelete, // передаємо функцію для оновлення
+    required this.onDelete,
     super.key,
   });
 
@@ -78,18 +78,13 @@ class _CharacterItemState extends State<CharacterItem> {
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () async {
-                    // Підтвердження видалення
                    final bool confirmDelete = await
                     _showDeleteConfirmation(context);
                     if (confirmDelete) {
-                      // Видаляємо персонажа
                       final dbHelper = DatabaseHelper();
        await dbHelper.deleteCharacter(int.parse(character['id'].toString()));
-
-                      // Оновлюємо список
                       widget.onDelete();
 
-                      // Показуємо повідомлення про видалення
                       if (mounted) {
                         // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -147,22 +142,22 @@ class _CharacterItemState extends State<CharacterItem> {
   Future<bool> _showDeleteConfirmation(BuildContext context) async {
   final result = await showDialog<bool>(
     context: context,
-    barrierDismissible: false, // Не можна закрити, натискаючи за межами діалогу
+    barrierDismissible: false,
     builder: (BuildContext context) {
       return AlertDialog(
         title: const Text(
           'Delete Character',
-          style: TextStyle(color: Colors.black), // чорний колір заголовка
+          style: TextStyle(color: Colors.black),
         ),
         content: const Text(
           'Are you sure you want to delete this character?',
-          style: TextStyle(color: Colors.black), // чорний колір тексту
+          style: TextStyle(color: Colors.black),
         ),
         actions: <Widget>[
           TextButton(
             child: const Text(
               'Cancel',
-              style: TextStyle(color: Colors.black), // чорний колір кнопки
+              style: TextStyle(color: Colors.black),
             ),
             onPressed: () {
               Navigator.of(context).pop(false);
@@ -171,7 +166,7 @@ class _CharacterItemState extends State<CharacterItem> {
           TextButton(
             child: const Text(
               'Delete',
-              style: TextStyle(color: Colors.black), // чорний колір кнопки
+              style: TextStyle(color: Colors.black),
             ),
             onPressed: () {
               Navigator.of(context).pop(true);
@@ -182,6 +177,6 @@ class _CharacterItemState extends State<CharacterItem> {
     },
   );
 
-  return result ?? false; // Handle null case by returning false
+  return result ?? false;
 }
 } 

@@ -18,6 +18,12 @@ class LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _checkAutoLogin();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
@@ -87,6 +93,8 @@ class LoginScreenState extends State<LoginScreen> {
           lastName: lastName,
           email: email,
         );
+
+        await databaseHelper.updateUserLoginStatus(email, isLoggedIn: true);
       }
 
       if (mounted) {
@@ -99,6 +107,40 @@ class LoginScreenState extends State<LoginScreen> {
       }
     } else {
       _showSnackBar('Invalid email or password.');
+    }
+  }
+
+  Future<void> _checkAutoLogin() async {
+    final databaseHelper = DatabaseHelper();
+    final users = await databaseHelper.getUsers();
+
+    for (var user in users) {
+      if (user['is_logged_in'] == 1) {
+        final firstName = user['first_name'] as String;
+        final lastName = user['last_name'] as String;
+        final email = user['email'] as String;
+
+        UserDataProvider.currentUser = User(
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+        );
+
+        if (mounted) {
+          // Показуємо повідомлення про автологін
+          _showSnackBar('Welcome back, $firstName $lastName!');
+
+          // Перенаправляємо на головний екран
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute<Widget>(
+              builder: (context) => const HomeScreen(),
+            ),
+          );
+        }
+
+        break; // Виходимо, якщо знайдено активного користувача
+      }
     }
   }
 

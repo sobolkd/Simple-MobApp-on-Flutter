@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
             )
           : CharacterListWidget(
               characters: _characters,
-              onDelete: _loadCharacters, // Оновлення списку після видалення
+              onDelete: _loadCharacters,
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -66,7 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (context) => const CreateCharacterScreen(),
             ),
           );
-          // Якщо персонаж був створений (result == true), оновлюємо список
           if (result == true) {
             _loadCharacters();
           }
