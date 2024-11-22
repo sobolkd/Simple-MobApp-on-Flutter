@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:my_project/database_helper.dart';
 import 'package:my_project/screens/home_screen.dart';
 import 'package:my_project/screens/registration_screen.dart';
+import 'package:my_project/user.dart';
 import 'package:my_project/widgets/button.dart';
 import 'package:my_project/widgets/field_info.dart';
 
-class LoginScreen extends StatelessWidget {
-  
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  LoginScreenState createState() => LoginScreenState();
+}
+
+class LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,21 +38,14 @@ class LoginScreen extends StatelessWidget {
             const SizedBox(height: 16),
             CustomButton(
               text: 'Login',
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute<Widget>(
-                    builder: (context) => const HomeScreen(),
-                  ),
-                );
-              },
+              onPressed: _handleLoginPressed,
             ),
             TextButton(
               onPressed: () {
-                Navigator.push<RegisterScreen>(
+                Navigator.push(
                   context,
-                  MaterialPageRoute<RegisterScreen>(
-                    builder: (context) => RegisterScreen(),
+                  MaterialPageRoute(
+                    builder: (context) => const RegisterScreen(),
                   ),
                 );
               },
@@ -56,5 +55,58 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _handleLoginPressed() async {
+    await _loginUser();
+  }
+
+  Future<void> _loginUser() async {
+    final email = emailController.text;
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      _showSnackBar('Please fill in both fields.');
+      return;
+    }
+
+    final databaseHelper = DatabaseHelper();
+
+    final exists = await databaseHelper.checkLogin(email, password);
+
+    if (exists) {
+      final user = await databaseHelper.getUserByEmail(email);
+
+      if (user != null) {
+        final firstName = user['first_name'] as String;
+        final lastName = user['last_name'] as String;
+        final email = user['email'] as String;
+
+        UserDataProvider.currentUser = User(
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+        );
+      }
+
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute<Widget>(
+            builder: (context) => const HomeScreen(),
+          ),
+        );
+      }
+    } else {
+      _showSnackBar('Invalid email or password.');
+    }
+  }
+
+  void _showSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
   }
 }
