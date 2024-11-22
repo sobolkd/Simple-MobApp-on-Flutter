@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_project/database_helper.dart';
+import 'package:my_project/network_utils.dart';
 import 'package:my_project/screens/create_character_screen.dart';
 import 'package:my_project/screens/profile_screen.dart';
 import 'package:my_project/widgets/character_list_widget.dart';
@@ -26,6 +27,45 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _characters = characters;
     });
+  }
+
+  Future<void> _handleCreateCharacter() async {
+    final isConnected = await checkConnectivity();
+    if (!isConnected) {
+      _showNoConnectionDialog();
+      return;
+    }
+
+    final result = await Navigator.push(
+      // ignore: use_build_context_synchronously
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateCharacterScreen(),
+      ),
+    );
+    if (result == true) {
+      _loadCharacters();
+    }
+  }
+
+  Future<void> _showNoConnectionDialog() async {
+    return showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('No Internet Connection', style: TextStyle(color:
+        Colors.black,),),
+        content: const Text('Please check your internet connection.', style: 
+        TextStyle(color: Colors.black,),),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK', style: TextStyle(color: Colors.black)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -59,17 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onDelete: _loadCharacters,
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const CreateCharacterScreen(),
-            ),
-          );
-          if (result == true) {
-            _loadCharacters();
-          }
-        },
+        onPressed: _handleCreateCharacter,
         tooltip: 'Create Character',
         child: const Icon(Icons.add),
       ),
