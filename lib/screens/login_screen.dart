@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_project/database_helper.dart';
+import 'package:my_project/network_utils.dart';
 import 'package:my_project/screens/home_screen.dart';
 import 'package:my_project/screens/registration_screen.dart';
 import 'package:my_project/user.dart';
@@ -64,7 +65,13 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleLoginPressed() async {
-    await _loginUser();
+    final bool isConnected = await checkConnectivity();
+    if (!isConnected) {
+      // ignore: use_build_context_synchronously
+      await _showNoConnectionDialog(context);
+    } else {
+      await _loginUser();
+    }
   }
 
   Future<void> _loginUser() async {
@@ -111,6 +118,8 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _checkAutoLogin() async {
+    final bool isConnected = await checkConnectivity();
+    
     final databaseHelper = DatabaseHelper();
     final users = await databaseHelper.getUsers();
 
@@ -126,22 +135,44 @@ class LoginScreenState extends State<LoginScreen> {
           email: email,
         );
 
-        if (mounted) {
-          // Показуємо повідомлення про автологін
-          _showSnackBar('Welcome back, $firstName $lastName!');
+        if (!isConnected) {
+          // ignore: use_build_context_synchronously
+          await _showNoConnectionDialog(context);
+        }
 
-          // Перенаправляємо на головний екран
+        if (mounted) {
+          _showSnackBar('Welcome back, $firstName $lastName!');
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute<Widget>(
-              builder: (context) => const HomeScreen(),
-            ),
+            MaterialPageRoute<Widget>(builder: (context) => const HomeScreen()),
           );
         }
 
-        break; // Виходимо, якщо знайдено активного користувача
+        break;
       }
     }
+  }
+
+  Future<void> _showNoConnectionDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Відсутнє з\'єднання', style: TextStyle(color:
+         Colors.black,),),
+content:
+const 
+Text('Будь ласка, підключіться до Інтернету. Користування додатком обмежене', 
+        style: TextStyle(color: Colors.black,),),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK', style: TextStyle(color: Colors.black)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSnackBar(String message) {
