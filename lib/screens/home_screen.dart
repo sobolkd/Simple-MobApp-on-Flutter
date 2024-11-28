@@ -73,6 +73,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _handleViewSpells() async {
+    final isConnected = await checkConnectivity();
+    if (!isConnected) {
+      _showNoConnectionDialog();
+      return;
+    }
+
+    Navigator.push(
+      // ignore: use_build_context_synchronously
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SpellListScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,14 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 10),
           FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const SpellListScreen(),
-                ),
-              );
-            },
+            onPressed: _handleViewSpells,
             tooltip: 'View Spells',
             child: const Icon(Icons.book),
           ),
