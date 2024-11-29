@@ -4,6 +4,7 @@ import 'package:my_project/screens/login_screen.dart';
 import 'package:my_project/screens/registration_screen.dart';
 import 'package:my_project/services/auth_provider.dart';
 import 'package:my_project/services/register_provider.dart';
+import 'package:my_project/services/spell_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -12,6 +13,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => RegisterProvider()),
+        ChangeNotifierProvider(create: (_) => SpellProvider()),
       ],
       child: const MyApp(),
     ),
@@ -41,8 +43,8 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: FutureBuilder(
-        future: Provider.of<AuthProvider>(context,
-         listen: false,).checkAutoLogin(),
+        future: Provider.of<AuthProvider>(context, 
+        listen: false,).checkAutoLogin(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
@@ -60,7 +62,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
-        '/register': (context) => const RegisterScreen(),  // Add this line
+        '/register': (context) => const RegisterScreen(),
       },
     );
   }
