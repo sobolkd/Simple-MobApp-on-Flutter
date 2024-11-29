@@ -2,14 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:my_project/database_helper.dart';
 import 'package:my_project/user.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  @override
-  ProfileScreenState createState() => ProfileScreenState();
-}
-
-class ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = UserDataProvider.currentUser;
@@ -20,7 +15,7 @@ class ProfileScreenState extends State<ProfileScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pop();  // Повернення на попередній екран
+            Navigator.of(context).pop();
           },
         ),
       ),
@@ -84,12 +79,10 @@ class ProfileScreenState extends State<ProfileScreen> {
             ),
             TextButton(
               onPressed: () async {
-                await databaseHelper.updateUserLoginStatus(email, isLoggedIn:
-                 false,);
-                if (mounted) {
-                  // ignore: use_build_context_synchronously
-                  Navigator.of(context).pop(true);
-                }
+                await databaseHelper.updateUserLoginStatus(email, isLoggedIn: 
+                false,);
+                // ignore: use_build_context_synchronously
+                Navigator.of(context).pop(true);
               },
               child: const Text(
                 'Log Out',
@@ -101,7 +94,7 @@ class ProfileScreenState extends State<ProfileScreen> {
       },
     );
 
-    if (shouldLogOut == true && mounted) {
+    if (shouldLogOut == true) {
       Navigator.pushNamedAndRemoveUntil(
         // ignore: use_build_context_synchronously
         context,
