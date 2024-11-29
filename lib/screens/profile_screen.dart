@@ -8,7 +8,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Отримуємо AuthProvider для доступу до поточного користувача
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.currentUser;
 

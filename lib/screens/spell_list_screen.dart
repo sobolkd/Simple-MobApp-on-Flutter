@@ -7,7 +7,6 @@ class SpellListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Викликаємо fetchSpells(), щоб почати завантаження даних
     final provider = Provider.of<SpellProvider>(context, listen: false);
     provider.fetchSpells();
 

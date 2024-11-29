@@ -54,8 +54,7 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-
-  // Логіка для входу
+  
   void _handleLoginPressed(BuildContext context,
    TextEditingController emailController, TextEditingController
     passwordController, AuthProvider authProvider,) async {

@@ -7,7 +7,7 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoggedIn = false;
   User? _currentUser;
 
-  final DatabaseHelper databaseHelper = DatabaseHelper(); // ініціалізація
+  final DatabaseHelper databaseHelper = DatabaseHelper();
 
   bool get isLoggedIn => _isLoggedIn;
   User? get currentUser => _currentUser;
@@ -25,7 +25,7 @@ class AuthProvider extends ChangeNotifier {
         );
         _isLoggedIn = true;
 
-        // Збереження поточного користувача в глобальному класі UserDataProvider
+        // save in UserDataProvider
         udp.UserDataProvider.currentUser = _currentUser;
 
         await databaseHelper.updateUserLoginStatus(email, isLoggedIn: true);
@@ -43,18 +43,17 @@ class AuthProvider extends ChangeNotifier {
         final lastName = user['last_name'] as String;
         final email = user['email'] as String;
 
-        // Збереження поточного користувача в глобальному класі UserDataProvider
+         // save in UserDataProvider
         udp.UserDataProvider.currentUser = User(
           firstName: firstName,
           lastName: lastName,
           email: email,
         );
 
-        // Оновлюємо стан в AuthProvider
         _currentUser = udp.UserDataProvider.currentUser;
         _isLoggedIn = true;
 
-        notifyListeners();  // Важливо для оновлення UI
+        notifyListeners();
         return _currentUser;
       }
     }

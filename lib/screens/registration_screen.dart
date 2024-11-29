@@ -9,7 +9,6 @@ class RegisterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Ініціалізація контролерів для введення даних
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
@@ -69,7 +68,7 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(context); // Повернення на екран входу
+                    Navigator.pop(context);
                   },
                   child: const Text('Already have an account? Login'),
                 ),
