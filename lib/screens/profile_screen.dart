@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:my_project/database_helper.dart';
-import 'package:my_project/user.dart';
+import 'package:my_project/services/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = UserDataProvider.currentUser;
+    // Отримуємо AuthProvider для доступу до поточного користувача
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.currentUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -79,8 +82,8 @@ class ProfileScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () async {
-                await databaseHelper.updateUserLoginStatus(email, isLoggedIn: 
-                false,);
+                await databaseHelper.updateUserLoginStatus(email,
+                 isLoggedIn: false,);
                 // ignore: use_build_context_synchronously
                 Navigator.of(context).pop(true);
               },

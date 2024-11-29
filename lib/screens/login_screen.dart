@@ -1,33 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:my_project/database_helper.dart';
 import 'package:my_project/network_utils.dart';
 import 'package:my_project/screens/home_screen.dart';
 import 'package:my_project/screens/registration_screen.dart';
-import 'package:my_project/services/autologin_service.dart';
-import 'package:my_project/user.dart';
+import 'package:my_project/services/auth_provider.dart';
 import 'package:my_project/widgets/button.dart';
 import 'package:my_project/widgets/field_info.dart';
+import 'package:provider/provider.dart';
 
-
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
-  LoginScreenState createState() => LoginScreenState();
-}
-
-class LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _checkAutoLogin();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
       body: Padding(
@@ -47,7 +35,8 @@ class LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 16),
             CustomButton(
               text: 'Login',
-              onPressed: () => _handleLoginPressed(context),
+              onPressed: () => _handleLoginPressed(context, emailController,
+               passwordController, authProvider,),
             ),
             TextButton(
               onPressed: () {
@@ -66,77 +55,40 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _handleLoginPressed(BuildContext context) async {
-  final bool isConnected = await checkConnectivity();
-
-  if (!isConnected) {
-    if (mounted) {
-      // ignore: use_build_context_synchronously
-      await _showNoConnectionDialog(context);
-    }
-  } else {
-    if (mounted) {
-      // ignore: use_build_context_synchronously
-      await _loginUser(context);
-    }
-  }
-}
-
-
-  Future<void> _loginUser(BuildContext context) async {
+  // Логіка для входу
+  void _handleLoginPressed(BuildContext context,
+   TextEditingController emailController, TextEditingController
+    passwordController, AuthProvider authProvider,) async {
     final email = emailController.text;
     final password = passwordController.text;
 
-    if (email.isEmpty || password.isEmpty) {
-      _showSnackBar(context, 'Please fill in both fields.');
-      return;
-    }
-
-    final databaseHelper = DatabaseHelper();
-    final exists = await databaseHelper.checkLogin(email, password);
-
-    if (exists) {
-      final user = await databaseHelper.getUserByEmail(email);
-
-      if (user != null) {
-        final firstName = user['first_name'] as String;
-        final lastName = user['last_name'] as String;
-        final email = user['email'] as String;
-
-        UserDataProvider.currentUser = User(
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
-        );
-
-        await databaseHelper.updateUserLoginStatus(email, isLoggedIn: true);
-      }
-
-      if (mounted) {
-        Navigator.pushReplacement(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute<Widget>(builder: (context) => const HomeScreen()),
-        );
-      }
-    } else {
+    final bool isConnected = await checkConnectivity();
+    if (!isConnected) {
       // ignore: use_build_context_synchronously
-      _showSnackBar(context, 'Invalid email or password.');
+      _showNoConnectionDialog(context);
+    } else {
+      if (email.isNotEmpty && password.isNotEmpty) {
+        await authProvider.login(email, password);
+        if (authProvider.isLoggedIn) {
+          Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        } else {
+          // ignore: use_build_context_synchronously
+          _showSnackBar(context, 'Invalid email or password.');
+        }
+      } else {
+        // ignore: use_build_context_synchronously
+        _showSnackBar(context, 'Please fill in both fields.');
+      }
     }
   }
 
-  Future<void> _checkAutoLogin() async {
-    final autoLoginService = AutoLoginService();
-    final currentUser = await autoLoginService.checkAutoLogin();
-
-    if (currentUser != null && mounted) {
-      _showSnackBar(context,
-       'Welcome back, ${currentUser.firstName} ${currentUser.lastName}!',);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute<Widget>(builder: (context) => const HomeScreen()),
-      );
-    }
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: 
+    Text(message),),);
   }
 
   Future<void> _showNoConnectionDialog(BuildContext context) async {
@@ -159,12 +111,5 @@ class LoginScreenState extends State<LoginScreen> {
         ],
       ),
     );
-  }
-
-  void _showSnackBar(BuildContext context, String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: 
-      Text(message),),);
-    }
   }
 }
