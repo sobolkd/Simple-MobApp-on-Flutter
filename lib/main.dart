@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_project/screens/login_screen.dart';
+import 'package:my_project/screens/profile_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,7 +28,11 @@ class MyApp extends StatelessWidget {
           hintStyle: TextStyle(color: Colors.grey),
         ),
       ),
-      home: const LoginScreen(),
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/profile': (context) => const ProfileScreen(),
+      },
     );
   }
 }

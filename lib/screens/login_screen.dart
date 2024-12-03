@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_project/database_helper.dart';
+import 'package:my_project/network_utils.dart';
 import 'package:my_project/screens/home_screen.dart';
 import 'package:my_project/screens/registration_screen.dart';
 import 'package:my_project/user.dart';
@@ -16,6 +17,12 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAutoLogin();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +65,13 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleLoginPressed() async {
-    await _loginUser();
+    final bool isConnected = await checkConnectivity();
+    if (!isConnected) {
+      // ignore: use_build_context_synchronously
+      await _showNoConnectionDialog(context);
+    } else {
+      await _loginUser();
+    }
   }
 
   Future<void> _loginUser() async {
@@ -87,6 +100,8 @@ class LoginScreenState extends State<LoginScreen> {
           lastName: lastName,
           email: email,
         );
+
+        await databaseHelper.updateUserLoginStatus(email, isLoggedIn: true);
       }
 
       if (mounted) {
@@ -100,6 +115,64 @@ class LoginScreenState extends State<LoginScreen> {
     } else {
       _showSnackBar('Invalid email or password.');
     }
+  }
+
+  Future<void> _checkAutoLogin() async {
+    final bool isConnected = await checkConnectivity();
+    
+    final databaseHelper = DatabaseHelper();
+    final users = await databaseHelper.getUsers();
+
+    for (var user in users) {
+      if (user['is_logged_in'] == 1) {
+        final firstName = user['first_name'] as String;
+        final lastName = user['last_name'] as String;
+        final email = user['email'] as String;
+
+        UserDataProvider.currentUser = User(
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+        );
+
+        if (!isConnected) {
+          // ignore: use_build_context_synchronously
+          await _showNoConnectionDialog(context);
+        }
+
+        if (mounted) {
+          _showSnackBar('Welcome back, $firstName $lastName!');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute<Widget>(builder: (context) => const HomeScreen()),
+          );
+        }
+
+        break;
+      }
+    }
+  }
+
+  Future<void> _showNoConnectionDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Відсутнє з\'єднання', style: TextStyle(color:
+         Colors.black,),),
+content:
+const 
+Text('Будь ласка, підключіться до Інтернету. Користування додатком обмежене', 
+        style: TextStyle(color: Colors.black,),),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK', style: TextStyle(color: Colors.black)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSnackBar(String message) {
