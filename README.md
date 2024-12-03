@@ -1,6 +1,6 @@
-# my_project
+# project for NULP
 
-A new Flutter project.
+A new Flutter project
 
 ## Getting Started
 
