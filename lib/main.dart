@@ -1,8 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:my_project/screens/home_screen.dart';
 import 'package:my_project/screens/login_screen.dart';
+import 'package:my_project/screens/registration_screen.dart';
+import 'package:my_project/services/auth_provider.dart';
+import 'package:my_project/services/register_provider.dart';
+import 'package:my_project/services/spell_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => RegisterProvider()),
+        ChangeNotifierProvider(create: (_) => SpellProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -27,7 +42,28 @@ class MyApp extends StatelessWidget {
           hintStyle: TextStyle(color: Colors.grey),
         ),
       ),
-      home: const LoginScreen(),
+      home: FutureBuilder(
+        future: Provider.of<AuthProvider>(context, 
+        listen: false,).checkAutoLogin(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          if (snapshot.hasData && snapshot.data != null) {
+            return const HomeScreen();
+          }
+
+          return const LoginScreen();
+        },
+      ),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/register': (context) => const RegisterScreen(),
+      },
     );
   }
 }

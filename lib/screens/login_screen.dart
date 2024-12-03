@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:my_project/database_helper.dart';
+import 'package:my_project/network_utils.dart';
 import 'package:my_project/screens/home_screen.dart';
 import 'package:my_project/screens/registration_screen.dart';
-import 'package:my_project/user.dart';
+import 'package:my_project/services/auth_provider.dart';
 import 'package:my_project/widgets/button.dart';
 import 'package:my_project/widgets/field_info.dart';
+import 'package:provider/provider.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
-  LoginScreenState createState() => LoginScreenState();
-}
-
-class LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
-  @override
   Widget build(BuildContext context) {
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
       body: Padding(
@@ -38,7 +35,8 @@ class LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 16),
             CustomButton(
               text: 'Login',
-              onPressed: _handleLoginPressed,
+              onPressed: () => _handleLoginPressed(context, emailController,
+               passwordController, authProvider,),
             ),
             TextButton(
               onPressed: () {
@@ -56,57 +54,61 @@ class LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
-  void _handleLoginPressed() async {
-    await _loginUser();
-  }
-
-  Future<void> _loginUser() async {
+  
+  void _handleLoginPressed(BuildContext context,
+   TextEditingController emailController, TextEditingController
+    passwordController, AuthProvider authProvider,) async {
     final email = emailController.text;
     final password = passwordController.text;
 
-    if (email.isEmpty || password.isEmpty) {
-      _showSnackBar('Please fill in both fields.');
-      return;
-    }
-
-    final databaseHelper = DatabaseHelper();
-
-    final exists = await databaseHelper.checkLogin(email, password);
-
-    if (exists) {
-      final user = await databaseHelper.getUserByEmail(email);
-
-      if (user != null) {
-        final firstName = user['first_name'] as String;
-        final lastName = user['last_name'] as String;
-        final email = user['email'] as String;
-
-        UserDataProvider.currentUser = User(
-          firstName: firstName,
-          lastName: lastName,
-          email: email,
-        );
-      }
-
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute<Widget>(
-            builder: (context) => const HomeScreen(),
-          ),
-        );
-      }
+    final bool isConnected = await checkConnectivity();
+    if (!isConnected) {
+      // ignore: use_build_context_synchronously
+      _showNoConnectionDialog(context);
     } else {
-      _showSnackBar('Invalid email or password.');
+      if (email.isNotEmpty && password.isNotEmpty) {
+        await authProvider.login(email, password);
+        if (authProvider.isLoggedIn) {
+          Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        } else {
+          // ignore: use_build_context_synchronously
+          _showSnackBar(context, 'Invalid email or password.');
+        }
+      } else {
+        // ignore: use_build_context_synchronously
+        _showSnackBar(context, 'Please fill in both fields.');
+      }
     }
   }
 
-  void _showSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
-    }
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: 
+    Text(message),),);
+  }
+
+  Future<void> _showNoConnectionDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('No Connection', style: TextStyle(color:
+         Colors.black,),),
+        content: const Text(
+          'Please connect to the internet. Limited app functionality.',
+          style: TextStyle(color: Colors.black),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK', style: TextStyle(color: Colors.black)),
+          ),
+        ],
+      ),
+    );
   }
 }

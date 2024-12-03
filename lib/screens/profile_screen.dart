@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:my_project/user.dart';
+import 'package:my_project/database_helper.dart';
+import 'package:my_project/services/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = UserDataProvider.currentUser;
+    final authProvider = Provider.of<AuthProvider>(context);
+    final user = authProvider.currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        title: const Text('Profile'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ),
       body: user == null
           ? const Center(child: CircularProgressIndicator())
           : Padding(
@@ -26,9 +37,72 @@ class ProfileScreen extends StatelessWidget {
                     'Email: ${user.email}',
                     style: const TextStyle(fontSize: 18),
                   ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => _showLogOutDialog(context, user.email),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                    ),
+                    child: const Text(
+                      'Log Out',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
                 ],
               ),
             ),
     );
+  }
+
+  Future<void> _showLogOutDialog(BuildContext context, String email) async {
+    final databaseHelper = DatabaseHelper();
+
+    final bool? shouldLogOut = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Log Out',
+            style: TextStyle(color: Colors.black),
+          ),
+          content: const Text(
+            'Are you sure you want to log out?',
+            style: TextStyle(color: Colors.black),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                await databaseHelper.updateUserLoginStatus(email,
+                 isLoggedIn: false,);
+                // ignore: use_build_context_synchronously
+                Navigator.of(context).pop(true);
+              },
+              child: const Text(
+                'Log Out',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldLogOut == true) {
+      Navigator.pushNamedAndRemoveUntil(
+        // ignore: use_build_context_synchronously
+        context,
+        '/login',
+        (Route<dynamic> route) => false,
+      );
+    }
   }
 }

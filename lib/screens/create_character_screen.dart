@@ -184,7 +184,7 @@ class CreateCharacterScreenState extends State<CreateCharacterScreen> {
     showSnackBar(confirmationMessage);
 
     if (mounted) {
-      Navigator.pop(context);
+      Navigator.pop(context, true); // Повертаємось назад з результатом
     }
   } catch (e) {
     // ignore: avoid_print
