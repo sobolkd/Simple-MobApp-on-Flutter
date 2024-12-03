@@ -4,7 +4,7 @@ class DropdownField extends StatefulWidget {
   final String label;
   final List<String> options;
   final String hintText;
-  final void Function(String?)? onChanged; // Explicit return type 'void'
+  final void Function(String?)? onChanged;
 
   const DropdownField({
     required this.label,
