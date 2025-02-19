@@ -1,16 +1,16 @@
-# my_project
+# Simple Mobile App on Flutter
 
-A new Flutter project.
+This is a simple mobile application built using Flutter. The project was created as a way to practice and learn Flutter development. It demonstrates the fundamentals of Flutter while implementing basic functionality.
 
-## Getting Started
+## Features
+- A simple, clean user interface
+- Basic app navigation and functionality
 
-This project is a starting point for a Flutter application.
+## Prerequisites
+- Flutter SDK
+- Dart
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Installation
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/sobolkd/Simple-MobApp-on-Flutter.git
